@@ -1,0 +1,12 @@
+# Python virtual environment
+venv/
+__pycache__/
+*.pyc
+
+# Local runtime logs and state
+*.log
+nodes.json
+transaction_wal.log
+
+# VS Code directory
+.vscode/

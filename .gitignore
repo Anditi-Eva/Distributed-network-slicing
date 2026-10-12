@@ -10,3 +10,9 @@ transaction_wal.log
 
 # VS Code directory
 .vscode/
+
+venv/
+.venv/
+__pycache__/
+*.pyc
+dfs_block_store/

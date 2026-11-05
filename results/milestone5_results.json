@@ -1,0 +1,424 @@
+{
+  "acid": {
+    "atomicity": {
+      "status": "ABORTED",
+      "allocated_cpu": {
+        "edge": 4,
+        "core": 4,
+        "cloud": 4
+      },
+      "reserved_cpu": {
+        "edge": 0,
+        "core": 0,
+        "cloud": 0
+      },
+      "ok": false
+    },
+    "durability": {
+      "committed_tx": "tx-d7170c23",
+      "before": {
+        "edge": [
+          4,
+          [
+            "tx-35d823ae",
+            "tx-ab101a11",
+            "tx-c5809b41",
+            "tx-f0e54479"
+          ]
+        ],
+        "core": [
+          4,
+          [
+            "tx-35d823ae",
+            "tx-ab101a11",
+            "tx-c5809b41",
+            "tx-f0e54479"
+          ]
+        ],
+        "cloud": [
+          4,
+          [
+            "tx-35d823ae",
+            "tx-ab101a11",
+            "tx-c5809b41",
+            "tx-f0e54479"
+          ]
+        ]
+      },
+      "after": {
+        "edge": [
+          4,
+          [
+            "tx-35d823ae",
+            "tx-ab101a11",
+            "tx-c5809b41",
+            "tx-f0e54479"
+          ]
+        ],
+        "core": [
+          4,
+          [
+            "tx-35d823ae",
+            "tx-ab101a11",
+            "tx-c5809b41",
+            "tx-f0e54479"
+          ]
+        ],
+        "cloud": [
+          4,
+          [
+            "tx-35d823ae",
+            "tx-ab101a11",
+            "tx-c5809b41",
+            "tx-f0e54479"
+          ]
+        ]
+      },
+      "ok": false
+    },
+    "isolation": {
+      "concurrent_transactions": 20,
+      "capacity_left_cpu": 3.0,
+      "committed": 0,
+      "aborted": 20,
+      "allocated_cpu": {
+        "edge": 4,
+        "core": 4,
+        "cloud": 4
+      },
+      "ok": false
+    },
+    "consistency": {
+      "ok": true,
+      "violations": []
+    }
+  },
+  "perf": [
+    {
+      "wal_microbench": {
+        "forced_ms": 0.01015951000226778,
+        "unforced_ms": 0.011001306666003074
+      }
+    },
+    {
+      "protocol": "2PC",
+      "fsync": true,
+      "concurrency": 1,
+      "n": 20,
+      "commit_rate": 0.0,
+      "mean_ms": 0.0,
+      "p50_ms": 0.0,
+      "p95_ms": 0.0,
+      "throughput": 0.0,
+      "messages": 0.0,
+      "prepare_ms": 0.0,
+      "precommit_ms": 0.0,
+      "decide_ms": 0.0
+    },
+    {
+      "protocol": "2PC",
+      "fsync": true,
+      "concurrency": 4,
+      "n": 20,
+      "commit_rate": 0.0,
+      "mean_ms": 0.0,
+      "p50_ms": 0.0,
+      "p95_ms": 0.0,
+      "throughput": 0.0,
+      "messages": 0.0,
+      "prepare_ms": 0.0,
+      "precommit_ms": 0.0,
+      "decide_ms": 0.0
+    },
+    {
+      "protocol": "3PC",
+      "fsync": true,
+      "concurrency": 1,
+      "n": 20,
+      "commit_rate": 0.0,
+      "mean_ms": 0.0,
+      "p50_ms": 0.0,
+      "p95_ms": 0.0,
+      "throughput": 0.0,
+      "messages": 0.0,
+      "prepare_ms": 0.0,
+      "precommit_ms": 0.0,
+      "decide_ms": 0.0
+    },
+    {
+      "protocol": "3PC",
+      "fsync": true,
+      "concurrency": 4,
+      "n": 20,
+      "commit_rate": 0.0,
+      "mean_ms": 0.0,
+      "p50_ms": 0.0,
+      "p95_ms": 0.0,
+      "throughput": 0.0,
+      "messages": 0.0,
+      "prepare_ms": 0.0,
+      "precommit_ms": 0.0,
+      "decide_ms": 0.0
+    },
+    {
+      "consistency_after_run": true,
+      "fsync": true
+    },
+    {
+      "protocol": "2PC",
+      "fsync": false,
+      "concurrency": 1,
+      "n": 20,
+      "commit_rate": 0.0,
+      "mean_ms": 0.0,
+      "p50_ms": 0.0,
+      "p95_ms": 0.0,
+      "throughput": 0.0,
+      "messages": 0.0,
+      "prepare_ms": 0.0,
+      "precommit_ms": 0.0,
+      "decide_ms": 0.0
+    },
+    {
+      "protocol": "2PC",
+      "fsync": false,
+      "concurrency": 4,
+      "n": 20,
+      "commit_rate": 0.0,
+      "mean_ms": 0.0,
+      "p50_ms": 0.0,
+      "p95_ms": 0.0,
+      "throughput": 0.0,
+      "messages": 0.0,
+      "prepare_ms": 0.0,
+      "precommit_ms": 0.0,
+      "decide_ms": 0.0
+    },
+    {
+      "protocol": "3PC",
+      "fsync": false,
+      "concurrency": 1,
+      "n": 20,
+      "commit_rate": 0.0,
+      "mean_ms": 0.0,
+      "p50_ms": 0.0,
+      "p95_ms": 0.0,
+      "throughput": 0.0,
+      "messages": 0.0,
+      "prepare_ms": 0.0,
+      "precommit_ms": 0.0,
+      "decide_ms": 0.0
+    },
+    {
+      "protocol": "3PC",
+      "fsync": false,
+      "concurrency": 4,
+      "n": 20,
+      "commit_rate": 0.0,
+      "mean_ms": 0.0,
+      "p50_ms": 0.0,
+      "p95_ms": 0.0,
+      "throughput": 0.0,
+      "messages": 0.0,
+      "prepare_ms": 0.0,
+      "precommit_ms": 0.0,
+      "decide_ms": 0.0
+    },
+    {
+      "consistency_after_run": true,
+      "fsync": false
+    }
+  ],
+  "failures": {
+    "2PC": {
+      "F1 participant votes NO": [
+        {
+          "final_status": "ABORTED",
+          "states": {
+            "edge": "ABORTED",
+            "core": "ABORTED",
+            "cloud": "ABORTED"
+          },
+          "atomic": true,
+          "blocked": false,
+          "measured_from": "transaction start",
+          "resolution_ms": 33.3
+        }
+      ],
+      "F2 participant down before voting": [
+        {
+          "final_status": "ABORTED",
+          "states": {
+            "edge": "ABORTED",
+            "core": "ABORTED",
+            "cloud": "ABORTED"
+          },
+          "atomic": true,
+          "blocked": false,
+          "measured_from": "node restart",
+          "resolution_ms": 45.51076889038086
+        }
+      ],
+      "F3 participant crashes after voting YES": [
+        {
+          "final_status": "ABORTED",
+          "states": {
+            "edge": "ABORTED",
+            "core": "ABORTED",
+            "cloud": "ABORTED"
+          },
+          "atomic": true,
+          "blocked": false,
+          "measured_from": "node restart",
+          "resolution_ms": 41.70536994934082,
+          "unacknowledged_at_commit": []
+        }
+      ],
+      "F4 coordinator crashes after votes": [
+        {
+          "final_status": "ABORTED",
+          "states": {
+            "edge": "ABORTED",
+            "core": "ABORTED",
+            "cloud": "ABORTED"
+          },
+          "atomic": true,
+          "blocked": false,
+          "resolved_by": "participants (termination protocol)",
+          "measured_from": "coordinator crash",
+          "resolution_ms": 20.923614501953125,
+          "reserved_cpu_while_blocked": null
+        }
+      ],
+      "F5 coordinator crashes after decision": [
+        {
+          "final_status": "ABORTED",
+          "states": {
+            "edge": "ABORTED",
+            "core": "ABORTED",
+            "cloud": "ABORTED"
+          },
+          "atomic": true,
+          "blocked": false,
+          "resolved_by": "participants (termination protocol)",
+          "measured_from": "coordinator crash",
+          "resolution_ms": 28.01799774169922,
+          "reserved_cpu_while_blocked": null
+        }
+      ],
+      "_verify": {
+        "ok": true,
+        "violations": [],
+        "in_doubt": false
+      }
+    },
+    "3PC": {
+      "F1 participant votes NO": [
+        {
+          "final_status": "ABORTED",
+          "states": {
+            "edge": "ABORTED",
+            "core": "ABORTED",
+            "cloud": "ABORTED"
+          },
+          "atomic": true,
+          "blocked": false,
+          "measured_from": "transaction start",
+          "resolution_ms": 35.27
+        }
+      ],
+      "F2 participant down before voting": [
+        {
+          "final_status": "ABORTED",
+          "states": {
+            "edge": "ABORTED",
+            "core": "ABORTED",
+            "cloud": "ABORTED"
+          },
+          "atomic": true,
+          "blocked": false,
+          "measured_from": "node restart",
+          "resolution_ms": 41.588544845581055
+        }
+      ],
+      "F3 participant crashes after voting YES": [
+        {
+          "final_status": "ABORTED",
+          "states": {
+            "edge": "ABORTED",
+            "core": "ABORTED",
+            "cloud": "ABORTED"
+          },
+          "atomic": true,
+          "blocked": false,
+          "measured_from": "node restart",
+          "resolution_ms": 52.89101600646973,
+          "unacknowledged_at_commit": []
+        }
+      ],
+      "F4 coordinator crashes after votes": [
+        {
+          "final_status": "ABORTED",
+          "states": {
+            "edge": "ABORTED",
+            "core": "ABORTED",
+            "cloud": "ABORTED"
+          },
+          "atomic": true,
+          "blocked": false,
+          "resolved_by": "participants (termination protocol)",
+          "measured_from": "coordinator crash",
+          "resolution_ms": 22.63331413269043,
+          "reserved_cpu_while_blocked": null
+        }
+      ],
+      "F5 coordinator crashes after decision": [
+        {
+          "final_status": "ABORTED",
+          "states": {
+            "edge": "ABORTED",
+            "core": "ABORTED",
+            "cloud": "ABORTED"
+          },
+          "atomic": true,
+          "blocked": false,
+          "resolved_by": "participants (termination protocol)",
+          "measured_from": "coordinator crash",
+          "resolution_ms": 25.408506393432617,
+          "reserved_cpu_while_blocked": null
+        }
+      ],
+      "_verify": {
+        "ok": true,
+        "violations": [],
+        "in_doubt": false
+      }
+    }
+  },
+  "availability": {
+    "2PC": {
+      "transactions": 30,
+      "commit_rate": {
+        "before": 0.0,
+        "during": 0.0,
+        "after": 0.0
+      },
+      "overall_availability": 0.0,
+      "abort_latency_ms_during_outage": 27.636,
+      "consistent": true,
+      "violations": []
+    },
+    "3PC": {
+      "transactions": 30,
+      "commit_rate": {
+        "before": 0.0,
+        "during": 0.0,
+        "after": 0.0
+      },
+      "overall_availability": 0.0,
+      "abort_latency_ms_during_outage": 27.612,
+      "consistent": true,
+      "violations": []
+    }
+  }
+}

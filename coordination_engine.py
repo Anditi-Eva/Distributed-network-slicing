@@ -1,76 +1,360 @@
-import time
+import json
 import threading
+import time
+import uuid
+from collections import deque
+from concurrent.futures import ThreadPoolExecutor
+
 import requests
-from node_manager import load_cluster_config
+from flask import Blueprint, jsonify, request
+from prometheus_client import Counter, Gauge, Histogram
+
+COORD_MESSAGES = Counter('coordination_messages_total', 'Coordination messages sent', ['type'])
+COORD_CLOCK = Gauge('coordination_lamport_clock', 'Current Lamport clock value')
+COORD_IS_LEADER = Gauge('coordination_is_leader', '1 if this node is the leader')
+COORD_ELECTIONS = Counter('coordination_elections_total', 'Elections started by this node', ['reason'])
+COORD_ELECTION_SECONDS = Histogram('coordination_election_duration_seconds', 'Time from election start to leader known')
+
+ELECTION_TYPES = ("ELECTION", "OK", "COORDINATOR")
 
 class DistributedCoordinator:
-    def __init__(self, node_id, priority):
+    def __init__(self, node_id, priority, peers, rpc_timeout=0.5,
+                 coord_timeout=1.5, cooldown=1.0, monitor_interval=0.0,
+                 monitor_misses=3, max_retries=3):
         self.node_id = node_id
         self.priority = priority
-        self.leader_id = None
-        self.is_leader = False
+        self.peers = [p for p in peers if p["node_id"] != node_id]
+        self.peer_by_id = {p["node_id"]: p for p in self.peers}
+        self.rpc_timeout = rpc_timeout
+        self.coord_timeout = coord_timeout
+        self.cooldown = cooldown
+        self.monitor_interval = monitor_interval
+        self.monitor_misses = monitor_misses
+        self.max_retries = max_retries
+
+        self.lock = threading.RLock()
         self.logical_clock = 0
-        self.lock = threading.Lock()
-        
-    def tick_clock(self, incoming_clock=0):
+        self.leader_id = None
+        self.leader_priority = None
+        self.leader_since = 0.0
+        self.is_leader = False
+        self.in_election = False
+        self.crashed = False
+        self._leader_event = threading.Event()
+
+        self.counts = {t: 0 for t in ("ELECTION", "OK", "COORDINATOR", "HEARTBEAT", "APP")}
+        self.bytes_sent = 0
+        self.election_started_at = None
+        self.last_election_seconds = None
+        self.last_election_reason = None
+        self.failure_detected_at = None
+        self.elections_started = 0
+        self.event_log = []
+        self.trace = deque(maxlen=2000)
+        self._monitor_thread = None
+
+    def tick_clock(self, incoming=0):
         with self.lock:
-            self.logical_clock = max(self.logical_clock, incoming_clock) + 1
+            self.logical_clock = max(self.logical_clock, incoming) + 1
+            COORD_CLOCK.set(self.logical_clock)
             return self.logical_clock
 
-    def start_election(self):
-        """Executes the Bully Algorithm to declare a Leader based on highest priority."""
-        print(f"[{self.node_id}] Triggering Leader Election (Priority: {self.priority})...")
-        config = load_cluster_config()
-        higher_nodes = []
+    def _stamp_send(self):
+        with self.lock:
+            self.logical_clock += 1
+            COORD_CLOCK.set(self.logical_clock)
+            return self.logical_clock
 
-        for node in config.get("nodes", []):
-            if node.get("priority", 0) > self.priority:
-                higher_nodes.append(node)
+    def _count(self, msg_type, nbytes):
+        with self.lock:
+            self.counts[msg_type] += 1
+            self.bytes_sent += nbytes
+        COORD_MESSAGES.labels(type=msg_type).inc()
 
-        # If no higher priority node exists, claim leadership
-        if not higher_nodes:
-            self.claim_leadership()
-            return
+    def _trace(self, direction, msg_type, peer, ts):
+        self.trace.append({"node": self.node_id, "dir": direction, "type": msg_type,
+                           "peer": peer, "lamport": ts})
 
-        # Challenge higher priority nodes
-        any_response = False
-        for node in higher_nodes:
-            port = node.get("agent_port") or node.get("port", 5001)
-            url = f"http://{node['ip_address']}:{port}/election/challenge"
-            try:
-                res = requests.post(url, json={"challenger_id": self.node_id, "priority": self.priority}, timeout=1)
-                if res.status_code == 200:
-                    any_response = True
-            except requests.exceptions.RequestException:
-                pass
+    def _post(self, peer, path, body, msg_type, stamp=None, merge_reply=True):
+        body = dict(body)
+        body["from"] = self.node_id
+        body["priority"] = self.priority
+        body["lamport"] = stamp if stamp is not None else self._stamp_send()
+        payload = json.dumps(body)
+        self._count(msg_type, len(payload))
+        self._trace("send", msg_type, peer["node_id"], body["lamport"])
+        try:
+            r = requests.post(peer["url"] + path, data=payload,
+                              headers={"Content-Type": "application/json"},
+                              timeout=self.rpc_timeout)
+            if r.status_code != 200:
+                return None
+            reply = r.json()
+            if merge_reply and "lamport" in reply:
+                self.tick_clock(reply["lamport"])
+            return reply
+        except (requests.exceptions.RequestException, ValueError):
+            return None
 
-        if not any_response:
-            self.claim_leadership()
+    def _claim_election(self, reason, skip_if_resolved=False):
+        with self.lock:
+            if self.in_election or self.crashed:
+                return False
+            if skip_if_resolved and self.leader_id is not None and \
+                    time.time() - self.leader_since < self.cooldown:
+                return False
+            self.in_election = True
+            self.election_started_at = time.time()
+            self.last_election_reason = reason
+            self.elections_started += 1
+            self.leader_id = None
+            self.leader_priority = None
+            self.is_leader = False
+            self._leader_event.clear()
+        COORD_ELECTIONS.labels(reason=reason).inc()
+        COORD_IS_LEADER.set(0)
+        return True
 
-    def claim_leadership(self):
+    def start_election(self, reason="manual"):
+        if not self._claim_election(reason):
+            return False
+        self._run_election()
+        return True
+
+    def _run_election(self):
+        for _ in range(self.max_retries):
+            higher = [p for p in self.peers if p["priority"] > self.priority]
+            if not higher:
+                self._declare_victory()
+                return
+
+            with ThreadPoolExecutor(max_workers=len(higher)) as pool:
+                replies = list(pool.map(
+                    lambda p: self._post(p, "/election/challenge", {}, "ELECTION"), higher))
+            got_ok = any(r and r.get("answer") == "OK" for r in replies)
+
+            if not got_ok:
+                self._declare_victory()
+                return
+
+            if self._leader_event.wait(self.coord_timeout):
+                return
+        with self.lock:
+            self.in_election = False
+
+    def _declare_victory(self):
         with self.lock:
             self.is_leader = True
             self.leader_id = self.node_id
-            self.logical_clock += 1
-            print(f" SUCCESS: Node [{self.node_id}] elected as LEADER at Logical Time L={self.logical_clock}")
+            self.leader_priority = self.priority
+            self.leader_since = time.time()
+            self.in_election = False
+            if self.election_started_at:
+                self.last_election_seconds = time.time() - self.election_started_at
+                COORD_ELECTION_SECONDS.observe(self.last_election_seconds)
+            self._leader_event.set()
+        COORD_IS_LEADER.set(1)
+        stamp = self.tick_clock()
+        targets = list(self.peers)
+        if targets:
+            with ThreadPoolExecutor(max_workers=len(targets)) as pool:
+                list(pool.map(lambda p: self._post(
+                    p, "/election/victory", {"leader_id": self.node_id},
+                    "COORDINATOR"), targets))
+        return stamp
 
-        # Broadcast leadership claim to cluster
-        config = load_cluster_config()
-        for node in config.get("nodes", []):
-            if node["node_id"] != self.node_id:
-                port = node.get("agent_port") or node.get("port", 5001)
-                url = f"http://{node['ip_address']}:{port}/election/victory"
-                try:
-                    requests.post(url, json={
-                        "leader_id": self.node_id,
-                        "logical_clock": self.logical_clock
-                    }, timeout=1)
-                except requests.exceptions.RequestException:
-                    pass
+    def on_challenge(self, data):
+        ts = self.tick_clock(data.get("lamport", 0))
+        self._trace("recv", "ELECTION", data.get("from"), ts)
+        sender_priority = data.get("priority", 0)
+        if sender_priority >= self.priority:
+            return {"answer": "IGNORE", "lamport": self.logical_clock}
 
-coordinator = None
+        if self._claim_election("challenged", skip_if_resolved=True):
+            threading.Thread(target=self._run_election, daemon=True).start()
+        stamp = self._stamp_send()
+        self._count("OK", 0)
+        self._trace("send", "OK", data.get("from"), stamp)
+        return {"answer": "OK", "lamport": stamp}
 
-def init_coordinator(node_id, priority):
-    global coordinator
-    coordinator = DistributedCoordinator(node_id, priority)
-    return coordinator
+    def on_victory(self, data):
+        ts = self.tick_clock(data.get("lamport", 0))
+        self._trace("recv", "COORDINATOR", data.get("from"), ts)
+        sender_priority = data.get("priority", 0)
+        if sender_priority < self.priority:
+            threading.Thread(target=self.start_election, args=("usurper",), daemon=True).start()
+            return {"accepted": False, "lamport": self.logical_clock}
+        with self.lock:
+            self.leader_id = data.get("leader_id", data.get("from"))
+            self.leader_priority = sender_priority
+            self.leader_since = time.time()
+            self.is_leader = (self.leader_id == self.node_id)
+            if self.election_started_at and self.in_election:
+                self.last_election_seconds = time.time() - self.election_started_at
+                COORD_ELECTION_SECONDS.observe(self.last_election_seconds)
+            self.in_election = False
+            self._leader_event.set()
+        COORD_IS_LEADER.set(1 if self.is_leader else 0)
+        return {"accepted": True, "lamport": self.logical_clock}
+
+    def start_monitor(self):
+        if self.monitor_interval <= 0 or self._monitor_thread:
+            return
+        self._monitor_thread = threading.Thread(target=self._monitor_loop, daemon=True)
+        self._monitor_thread.start()
+
+    def _monitor_loop(self):
+        misses = 0
+        while True:
+            time.sleep(self.monitor_interval)
+            with self.lock:
+                leader, busy, down = self.leader_id, self.in_election, self.crashed
+            if down or busy or leader is None or leader == self.node_id:
+                misses = 0
+                continue
+            peer = self.peer_by_id.get(leader)
+            reply = self._post(peer, "/coordination/ping", {}, "HEARTBEAT") if peer else None
+            if reply:
+                misses = 0
+                continue
+            misses += 1
+            if misses >= self.monitor_misses:
+                misses = 0
+                self.failure_detected_at = time.time()
+                self.start_election("leader_failure")
+
+    def _log_event(self, kind, ts, peer=None, msg_id=None, label=""):
+        with self.lock:
+            self.event_log.append({"seq": len(self.event_log), "node": self.node_id,
+                                   "kind": kind, "lamport": ts, "peer": peer,
+                                   "msg_id": msg_id, "label": label,
+                                   "wall": time.time()})
+
+    def local_event(self, label=""):
+        ts = self.tick_clock()
+        self._log_event("local", ts, label=label)
+        return ts
+
+    def app_send(self, to, label=""):
+        peer = self.peer_by_id.get(to)
+        if not peer:
+            return {"error": f"unknown peer {to}"}
+        msg_id = uuid.uuid4().hex[:10]
+        ts = self._stamp_send()
+        self._log_event("send", ts, peer=to, msg_id=msg_id, label=label)
+        reply = self._post(peer, "/message", {"msg_id": msg_id, "label": label},
+                           "APP", stamp=ts, merge_reply=False)
+        return {"msg_id": msg_id, "send_ts": ts,
+                "recv_ts": reply.get("recv_ts") if reply else None,
+                "delivered": reply is not None}
+
+    def on_message(self, data):
+        ts = self.tick_clock(data.get("lamport", 0))
+        self._log_event("recv", ts, peer=data.get("from"),
+                        msg_id=data.get("msg_id"), label=data.get("label", ""))
+        return {"recv_ts": ts, "lamport": ts}
+
+    def state(self, with_log=False):
+        with self.lock:
+            s = {"node_id": self.node_id, "priority": self.priority,
+                 "leader_id": self.leader_id, "is_leader": self.is_leader,
+                 "leader_since": self.leader_since,
+                 "in_election": self.in_election, "lamport_clock": self.logical_clock,
+                 "crashed": self.crashed, "counts": dict(self.counts),
+                 "election_messages": sum(self.counts[t] for t in ELECTION_TYPES),
+                 "bytes_sent": self.bytes_sent,
+                 "elections_started": self.elections_started,
+                 "last_election_seconds": self.last_election_seconds,
+                 "last_election_reason": self.last_election_reason,
+                 "failure_detected_at": self.failure_detected_at}
+            if with_log:
+                s["event_log"] = list(self.event_log)
+                s["trace"] = list(self.trace)
+            return s
+
+    def reset(self):
+        with self.lock:
+            self.logical_clock = 0
+            self.leader_id = self.leader_priority = None
+            self.leader_since = 0.0
+            self.is_leader = self.in_election = self.crashed = False
+            self.counts = {k: 0 for k in self.counts}
+            self.bytes_sent = 0
+            self.election_started_at = self.last_election_seconds = None
+            self.last_election_reason = self.failure_detected_at = None
+            self.elections_started = 0
+            self.event_log = []
+            self.trace.clear()
+            self._leader_event.clear()
+        COORD_CLOCK.set(0)
+        COORD_IS_LEADER.set(0)
+
+def build_blueprint(co):
+    bp = Blueprint("coordination", __name__)
+    always_allowed = ("/coordination/crash", "/coordination/reset", "/coordination/state")
+
+    @bp.before_request
+    def _simulate_crash():
+        if co.crashed and request.path not in always_allowed:
+            return jsonify({"status": "CRASHED"}), 503
+
+    @bp.route("/election/challenge", methods=["POST"])
+    def challenge():
+        return jsonify(co.on_challenge(request.get_json(force=True) or {}))
+
+    @bp.route("/election/victory", methods=["POST"])
+    def victory():
+        return jsonify(co.on_victory(request.get_json(force=True) or {}))
+
+    @bp.route("/election/trigger", methods=["POST"])
+    def trigger():
+        data = request.get_json(silent=True) or {}
+        if data.get("wait"):
+            started = co.start_election("manual")
+        else:
+            threading.Thread(target=co.start_election, args=("manual",), daemon=True).start()
+            started = True
+        return jsonify({"triggered": started})
+
+    @bp.route("/coordination/ping", methods=["POST"])
+    def ping():
+        data = request.get_json(silent=True) or {}
+        co.tick_clock(data.get("lamport", 0))
+        return jsonify({"status": "UP", "lamport": co.logical_clock})
+
+    @bp.route("/coordination/state", methods=["GET"])
+    def state():
+        return jsonify(co.state(with_log=request.args.get("log") == "1"))
+
+    @bp.route("/coordination/reset", methods=["POST"])
+    def reset():
+        co.reset()
+        return jsonify({"reset": True})
+
+    @bp.route("/coordination/crash", methods=["POST"])
+    def crash():
+        data = request.get_json(silent=True) or {}
+        co.crashed = bool(data.get("crashed", True))
+        return jsonify({"crashed": co.crashed})
+
+    @bp.route("/event/local", methods=["POST"])
+    def event_local():
+        data = request.get_json(silent=True) or {}
+        return jsonify({"node": co.node_id, "lamport": co.local_event(data.get("label", ""))})
+
+    @bp.route("/event/send", methods=["POST"])
+    def event_send():
+        data = request.get_json(force=True) or {}
+        return jsonify(co.app_send(data.get("to"), data.get("label", "")))
+
+    @bp.route("/message", methods=["POST"])
+    def message():
+        return jsonify(co.on_message(request.get_json(force=True) or {}))
+
+    return bp
+
+def register_coordination(app, node_id, priority, peers, **kwargs):
+    co = DistributedCoordinator(node_id, priority, peers, **kwargs)
+    app.register_blueprint(build_blueprint(co))
+    co.start_monitor()
+    return co

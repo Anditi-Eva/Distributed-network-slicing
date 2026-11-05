@@ -1,0 +1,43 @@
+{
+  "e1": {
+    "suspect_ms": 633.9,
+    "down_ms": 1731.8
+  },
+  "e2": {
+    "failover_ms": 7.55,
+    "replicated": true
+  },
+  "e3": {
+    "mttr_ms": 2532.9,
+    "availability_pct": 58.6,
+    "total_requests": 99,
+    "failed_requests": 41
+  },
+  "e4": {
+    "safe_bounds": {
+      "n": 4,
+      "f": 1,
+      "required_n": 4,
+      "is_safe": true
+    },
+    "unsafe_bounds": {
+      "n": 3,
+      "f": 1,
+      "required_n": 4,
+      "is_safe": false
+    },
+    "consensus_result": {
+      "valid_votes": {
+        "N1": "COMMIT",
+        "N2": "COMMIT",
+        "N3": "ABORT"
+      },
+      "byzantine_nodes": [
+        "N4_malicious"
+      ],
+      "commits": 2,
+      "aborts": 1,
+      "consensus": "COMMIT"
+    }
+  }
+}

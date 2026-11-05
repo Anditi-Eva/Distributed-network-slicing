@@ -1,0 +1,477 @@
+{
+  "e1": {
+    "3": {
+      "best": [
+        {
+          "ok": true,
+          "messages": 2,
+          "counts": {
+            "ELECTION": 0,
+            "OK": 0,
+            "COORDINATOR": 2
+          },
+          "bytes": 128,
+          "elections_started": 1,
+          "delay_ms": 25.61211585998535,
+          "consistent": true
+        },
+        {
+          "ok": true,
+          "messages": 2,
+          "counts": {
+            "ELECTION": 0,
+            "OK": 0,
+            "COORDINATOR": 2
+          },
+          "bytes": 128,
+          "elections_started": 1,
+          "delay_ms": 12.48311996459961,
+          "consistent": true
+        },
+        {
+          "ok": true,
+          "messages": 2,
+          "counts": {
+            "ELECTION": 0,
+            "OK": 0,
+            "COORDINATOR": 2
+          },
+          "bytes": 128,
+          "elections_started": 1,
+          "delay_ms": 16.325712203979492,
+          "consistent": true
+        }
+      ],
+      "typical": [
+        {
+          "ok": true,
+          "messages": 2,
+          "counts": {
+            "ELECTION": 0,
+            "OK": 0,
+            "COORDINATOR": 2
+          },
+          "bytes": 128,
+          "elections_started": 1,
+          "delay_ms": 20.023345947265625,
+          "consistent": true
+        },
+        {
+          "ok": true,
+          "messages": 8,
+          "counts": {
+            "ELECTION": 3,
+            "OK": 3,
+            "COORDINATOR": 2
+          },
+          "bytes": 263,
+          "elections_started": 3,
+          "delay_ms": 48.07424545288086,
+          "consistent": true
+        },
+        {
+          "ok": true,
+          "messages": 8,
+          "counts": {
+            "ELECTION": 3,
+            "OK": 3,
+            "COORDINATOR": 2
+          },
+          "bytes": 263,
+          "elections_started": 3,
+          "delay_ms": 23.914337158203125,
+          "consistent": true
+        }
+      ],
+      "worst": [
+        {
+          "ok": true,
+          "messages": 8,
+          "counts": {
+            "ELECTION": 3,
+            "OK": 3,
+            "COORDINATOR": 2
+          },
+          "bytes": 263,
+          "elections_started": 3,
+          "delay_ms": 45.55869102478027,
+          "consistent": true
+        },
+        {
+          "ok": true,
+          "messages": 8,
+          "counts": {
+            "ELECTION": 3,
+            "OK": 3,
+            "COORDINATOR": 2
+          },
+          "bytes": 263,
+          "elections_started": 3,
+          "delay_ms": 45.615434646606445,
+          "consistent": true
+        },
+        {
+          "ok": true,
+          "messages": 8,
+          "counts": {
+            "ELECTION": 3,
+            "OK": 3,
+            "COORDINATOR": 2
+          },
+          "bytes": 263,
+          "elections_started": 3,
+          "delay_ms": 33.56027603149414,
+          "consistent": true
+        }
+      ]
+    },
+    "5": {
+      "best": [
+        {
+          "ok": true,
+          "messages": 4,
+          "counts": {
+            "ELECTION": 0,
+            "OK": 0,
+            "COORDINATOR": 4
+          },
+          "bytes": 256,
+          "elections_started": 1,
+          "delay_ms": 54.28767204284668,
+          "consistent": true
+        },
+        {
+          "ok": true,
+          "messages": 4,
+          "counts": {
+            "ELECTION": 0,
+            "OK": 0,
+            "COORDINATOR": 4
+          },
+          "bytes": 256,
+          "elections_started": 1,
+          "delay_ms": 32.5617790222168,
+          "consistent": true
+        },
+        {
+          "ok": true,
+          "messages": 4,
+          "counts": {
+            "ELECTION": 0,
+            "OK": 0,
+            "COORDINATOR": 4
+          },
+          "bytes": 256,
+          "elections_started": 1,
+          "delay_ms": 31.84366226196289,
+          "consistent": true
+        }
+      ],
+      "typical": [
+        {
+          "ok": true,
+          "messages": 10,
+          "counts": {
+            "ELECTION": 3,
+            "OK": 3,
+            "COORDINATOR": 4
+          },
+          "bytes": 392,
+          "elections_started": 3,
+          "delay_ms": 64.18657302856445,
+          "consistent": true
+        },
+        {
+          "ok": true,
+          "messages": 16,
+          "counts": {
+            "ELECTION": 6,
+            "OK": 6,
+            "COORDINATOR": 4
+          },
+          "bytes": 527,
+          "elections_started": 4,
+          "delay_ms": 69.45013999938965,
+          "consistent": true
+        },
+        {
+          "ok": true,
+          "messages": 16,
+          "counts": {
+            "ELECTION": 6,
+            "OK": 6,
+            "COORDINATOR": 4
+          },
+          "bytes": 527,
+          "elections_started": 4,
+          "delay_ms": 65.49549102783203,
+          "consistent": true
+        }
+      ],
+      "worst": [
+        {
+          "ok": true,
+          "messages": 24,
+          "counts": {
+            "ELECTION": 10,
+            "OK": 10,
+            "COORDINATOR": 4
+          },
+          "bytes": 710,
+          "elections_started": 5,
+          "delay_ms": 102.58173942565918,
+          "consistent": true
+        },
+        {
+          "ok": true,
+          "messages": 24,
+          "counts": {
+            "ELECTION": 10,
+            "OK": 10,
+            "COORDINATOR": 4
+          },
+          "bytes": 710,
+          "elections_started": 5,
+          "delay_ms": 74.5236873626709,
+          "consistent": true
+        },
+        {
+          "ok": true,
+          "messages": 24,
+          "counts": {
+            "ELECTION": 10,
+            "OK": 10,
+            "COORDINATOR": 4
+          },
+          "bytes": 709,
+          "elections_started": 5,
+          "delay_ms": 88.70863914489746,
+          "consistent": true
+        }
+      ]
+    },
+    "7": {
+      "best": [
+        {
+          "ok": true,
+          "messages": 6,
+          "counts": {
+            "ELECTION": 0,
+            "OK": 0,
+            "COORDINATOR": 6
+          },
+          "bytes": 385,
+          "elections_started": 1,
+          "delay_ms": 71.39205932617188,
+          "consistent": true
+        },
+        {
+          "ok": true,
+          "messages": 6,
+          "counts": {
+            "ELECTION": 0,
+            "OK": 0,
+            "COORDINATOR": 6
+          },
+          "bytes": 385,
+          "elections_started": 1,
+          "delay_ms": 37.818193435668945,
+          "consistent": true
+        },
+        {
+          "ok": true,
+          "messages": 6,
+          "counts": {
+            "ELECTION": 0,
+            "OK": 0,
+            "COORDINATOR": 6
+          },
+          "bytes": 384,
+          "elections_started": 1,
+          "delay_ms": 62.474966049194336,
+          "consistent": true
+        }
+      ],
+      "typical": [
+        {
+          "ok": true,
+          "messages": 36,
+          "counts": {
+            "ELECTION": 15,
+            "OK": 15,
+            "COORDINATOR": 6
+          },
+          "bytes": 1065,
+          "elections_started": 6,
+          "delay_ms": 211.4412784576416,
+          "consistent": true
+        },
+        {
+          "ok": true,
+          "messages": 8,
+          "counts": {
+            "ELECTION": 1,
+            "OK": 1,
+            "COORDINATOR": 6
+          },
+          "bytes": 431,
+          "elections_started": 2,
+          "delay_ms": 47.90663719177246,
+          "consistent": true
+        },
+        {
+          "ok": true,
+          "messages": 48,
+          "counts": {
+            "ELECTION": 21,
+            "OK": 21,
+            "COORDINATOR": 6
+          },
+          "bytes": 1335,
+          "elections_started": 7,
+          "delay_ms": 167.4630641937256,
+          "consistent": true
+        }
+      ],
+      "worst": [
+        {
+          "ok": true,
+          "messages": 48,
+          "counts": {
+            "ELECTION": 21,
+            "OK": 21,
+            "COORDINATOR": 6
+          },
+          "bytes": 1338,
+          "elections_started": 7,
+          "delay_ms": 164.8101806640625,
+          "consistent": true
+        },
+        {
+          "ok": true,
+          "messages": 48,
+          "counts": {
+            "ELECTION": 21,
+            "OK": 21,
+            "COORDINATOR": 6
+          },
+          "bytes": 1340,
+          "elections_started": 7,
+          "delay_ms": 131.52384757995605,
+          "consistent": true
+        },
+        {
+          "ok": true,
+          "messages": 48,
+          "counts": {
+            "ELECTION": 21,
+            "OK": 21,
+            "COORDINATOR": 6
+          },
+          "bytes": 1338,
+          "elections_started": 7,
+          "delay_ms": 137.25638389587402,
+          "consistent": true
+        }
+      ]
+    }
+  },
+  "e2": {
+    "5": [
+      {
+        "ok": true,
+        "detection_ms": 427.5071620941162,
+        "election_ms": 36.8194580078125,
+        "recovery_ms": 464.3266201019287,
+        "messages": 8,
+        "consistent": true
+      },
+      {
+        "ok": true,
+        "detection_ms": 426.71704292297363,
+        "election_ms": 65.79041481018066,
+        "recovery_ms": 492.5074577331543,
+        "messages": 20,
+        "consistent": true
+      },
+      {
+        "ok": true,
+        "detection_ms": 449.34630393981934,
+        "election_ms": 36.9257926940918,
+        "recovery_ms": 486.27209663391113,
+        "messages": 8,
+        "consistent": true
+      }
+    ]
+  },
+  "e3": {
+    "chain": [
+      [
+        "a1",
+        "N1",
+        "local",
+        1
+      ],
+      [
+        "m1 send",
+        "N1",
+        "send",
+        2
+      ],
+      [
+        "m1 recv",
+        "N2",
+        "recv",
+        3
+      ],
+      [
+        "b1",
+        "N2",
+        "local",
+        4
+      ],
+      [
+        "m2 send",
+        "N2",
+        "send",
+        5
+      ],
+      [
+        "m2 recv",
+        "N3",
+        "recv",
+        6
+      ],
+      [
+        "m3 send",
+        "N3",
+        "send",
+        7
+      ],
+      [
+        "m3 recv",
+        "N1",
+        "recv",
+        8
+      ],
+      [
+        "c1 (concurrent)",
+        "N4",
+        "local",
+        1
+      ]
+    ],
+    "messages": 100,
+    "delivered": 100,
+    "clock_condition_violations": 0,
+    "duplicate_timestamps_per_node": 0,
+    "total_order_violations": 0,
+    "max_clock": 73,
+    "mean_latency_ms": 67.49191370002336,
+    "p95_latency_ms": 137.76225400033582,
+    "throughput_msgs_s": 113.6431604013234,
+    "timestamp_overhead_bytes": 17,
+    "message_bytes": 84,
+    "overhead_pct": 20.238095238095237
+  }
+}

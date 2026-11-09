@@ -294,6 +294,9 @@ To change resources on several nodes **all-or-nothing**, even when nodes crash. 
 1. *Prepare (voting):* the coordinator asks each participant to reserve resources; each replies YES or NO.
 2. *Decide:* if all vote YES the coordinator logs COMMIT and tells everyone; otherwise it logs ABORT.
 
+   <img width="1480" height="125" alt="image" src="https://github.com/user-attachments/assets/989c5814-0fda-460e-97c8-b2594011ebc3" />
+
+
 **Three-Phase Commit (3PC)** adds a *pre-commit* phase between voting and the final decision, so that no participant is ever left unable to decide when the coordinator fails (it is *non-blocking* under crash failures).
 
 **Write-ahead log (WAL).** Before acting, every node writes its intention to disk (`transaction_wal.py`) and forces it with `fsync`. After a restart the log is replayed, which provides durability and recovery.
